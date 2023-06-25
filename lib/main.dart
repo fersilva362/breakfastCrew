@@ -5,11 +5,13 @@ import 'package:user_app/view/email_view.dart';
 //import 'package:user_app/view/email_view.dart';
 import 'package:user_app/view/login_view.dart';
 import 'package:user_app/view/register_view.dart';
+import 'dart:developer' as devtools show log;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     routes: {
       '/login': (context) => const LoginView(),
       '/register': (context) => const RegisterView(),
@@ -43,17 +45,85 @@ _FutureBuilderState<dynamic>#2ec19):
 
         switch (snapshot.connectionState) {
           case ConnectionState.done:
-            if (user?.emailVerified ?? false) {
-              print('>>>>User with email succesfully verified<<<<');
-              return const LoginView();
+            if (user != null) {
+              if (user.emailVerified) {
+                devtools.log('emailVerified=${user.emailVerified.toString()}');
+
+                return const NotesView();
+              } else {
+                return const Email();
+              }
             } else {
-              print(user);
-              return const Email();
+              return const LoginView();
             }
           default:
-            return const Text('loading');
+            return const CircularProgressIndicator();
         }
       },
     );
   }
+}
+
+class NotesView extends StatefulWidget {
+  const NotesView({super.key});
+
+  @override
+  State<NotesView> createState() => _NotesViewState();
+}
+
+enum MenuAction { logout }
+
+class _NotesViewState extends State<NotesView> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('NoteView'),
+        actions: [
+          PopupMenuButton(
+            onSelected: (value) async {
+              switch (value) {
+                case MenuAction.logout:
+                  final dataShow = await mostrarMeDialogo(context);
+                  if (dataShow) {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/login', (route) => false);
+                  }
+                  break;
+                default:
+                  devtools.log('default');
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                  value: MenuAction.logout, child: Text('logout')),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+
+Future<bool> mostrarMeDialogo(context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) =>
+        AlertDialog(title: const Text('What do you want?'), actions: [
+      TextButton(
+          onPressed: () {
+            devtools.log('click cancel');
+            Navigator.pop(context, false);
+          },
+          child: const Text('cancel')),
+      TextButton(
+          onPressed: () {
+            Navigator.pop(context, true);
+            devtools.log('click logout');
+          },
+          child: const Text('logout'))
+    ]),
+  ).then((value) => value ?? false);
 }
