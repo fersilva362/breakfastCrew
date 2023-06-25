@@ -1,6 +1,9 @@
+import 'dart:developer' as devtools show log;
 import 'dart:js_interop';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:user_app/constant/dialogs.dart';
+import 'package:user_app/constant/routes.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -84,11 +87,18 @@ class _RegisterViewState extends State<RegisterView> {
                   email: email,
                   password: password,
                 );
-                if (userCredential.isUndefinedOrNull) {
-                  print("you're logged");
+                if (userCredential.isDefinedAndNotNull && context.mounted) {
+                  devtools.log("you're logged");
+                  Navigator.of(context).pushNamed(verifyEmailRoute);
+                  final emailValidate = FirebaseAuth.instance.currentUser;
+                  await emailValidate?.sendEmailVerification();
                 }
               } on FirebaseAuthException catch (e) {
-                print(e);
+                mostrarAlerta(
+                  context,
+                  e.toString(),
+                );
+                devtools.log(e.toString());
               }
             },
             child: const Text('REGISTER'),
@@ -96,7 +106,7 @@ class _RegisterViewState extends State<RegisterView> {
           TextButton(
             onPressed: () {
               Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/login', (route) => false);
+                  .pushNamedAndRemoveUntil(loginRoute, (route) => false);
             },
             child: const Text('Click to SignIn'),
           ),

@@ -1,8 +1,8 @@
-import 'dart:js_interop';
-
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'dart:developer' as devtools show log;
 import 'package:flutter/material.dart';
+import 'package:user_app/constant/dialogs.dart';
+import 'package:user_app/constant/routes.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -82,17 +82,33 @@ class _LoginViewState extends State<LoginView> {
               try {
                 final email = _email.text;
                 final password = _password.text;
-                final userCredential =
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+
+                await FirebaseAuth.instance.signInWithEmailAndPassword(
                   email: email,
                   password: password,
                 );
-                if (userCredential.isDefinedAndNotNull) {
-                  print(FirebaseAuth.instance.currentUser?.emailVerified ??
-                      false);
+                final user = FirebaseAuth.instance.currentUser;
+                devtools.log(user.toString());
+                final userWithMailVerify = user?.emailVerified ?? false;
+
+                if (userWithMailVerify && context.mounted) {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, noteRoute, (route) => false);
+                } else {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, verifyEmailRoute, (route) => false);
                 }
               } on FirebaseAuthException catch (e) {
-                print(e);
+                devtools.log(
+                  'loginView throw ${e.toString()} and ${e.code.toString()}',
+                );
+                await mostrarAlerta(
+                    context, 'error FireAuthException --- ${e.toString()} ');
+              } catch (e) {
+                await mostrarAlerta(context, 'error ${e.toString()}');
+                devtools.log(
+                  'loginView throw ${e.toString()} in catch General',
+                );
               }
             },
             child: const Text('Login'),
@@ -100,7 +116,7 @@ class _LoginViewState extends State<LoginView> {
           TextButton(
             onPressed: () {
               Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/register', (route) => false);
+                  .pushNamedAndRemoveUntil(registerRoute, (route) => false);
             },
             child: const Text('Click here to register'),
           ),
