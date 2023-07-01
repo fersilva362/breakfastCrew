@@ -1,7 +1,8 @@
-// ignore: file_names
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:user_app/constant/routes.dart';
+import 'package:user_app/services/auth/auth_service.dart';
 import 'dart:developer' as devtools show log;
+import '../constant/enums.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -9,8 +10,6 @@ class NotesView extends StatefulWidget {
   @override
   State<NotesView> createState() => _NotesViewState();
 }
-
-enum MenuAction { logout }
 
 class _NotesViewState extends State<NotesView> {
   @override
@@ -20,31 +19,30 @@ class _NotesViewState extends State<NotesView> {
         title: const Text('NoteView'),
         actions: [
           PopupMenuButton(
-            onSelected: (value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final dataShow = await mostrarMeDialogo(context);
-                  if (dataShow) {
-                    await FirebaseAuth.instance.signOut();
-                    if (context.mounted) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/login',
-                        (route) => false,
-                      );
+              onSelected: (value) async {
+                switch (value) {
+                  case MenuAction.logout:
+                    final dataShow = await mostrarMeDialogo(context);
+                    if (dataShow) {
+                      await AuthService.firebase().logOut();
+                      if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          loginRoute,
+                          (route) => false,
+                        );
+                      }
                     }
-                  }
-                  break;
-                default:
-                  devtools.log('default');
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                  value: MenuAction.logout, child: Text('logout')),
-            ],
-          )
+                    break;
+                  default:
+                    devtools.log('default');
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                    const PopupMenuItem(
+                        value: MenuAction.logout, child: Text('logout')),
+                  ])
         ],
       ),
     );

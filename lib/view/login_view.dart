@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer' as devtools show log;
 import 'package:flutter/material.dart';
 import 'package:user_app/constant/dialogs.dart';
 import 'package:user_app/constant/routes.dart';
+import 'package:user_app/services/auth/auth_exceptions.dart';
+import 'package:user_app/services/auth/auth_service.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -15,13 +16,7 @@ class _LoginViewState extends State<LoginView> {
   late TextEditingController _email;
   late TextEditingController _password;
   String finalWord = 'tatatt';
-  /* final Future _data = Firebase.initializeApp(
-    options: const FirebaseOptions(
-        apiKey: "AIzaSyCSs8xEwHeOEVz-87ECTfNUmO8ZKAQS8Ew",
-        appId: "1:995918257203:web:87dfb0f79391dee26b1746",
-        messagingSenderId: "995918257203",
-        projectId: "user-app-fersilva362-1369"),
-  ); */
+
   @override
   void initState() {
     _email = TextEditingController();
@@ -82,14 +77,12 @@ class _LoginViewState extends State<LoginView> {
               try {
                 final email = _email.text;
                 final password = _password.text;
+                await AuthService.firebase()
+                    .logIn(email: email, password: password);
 
-                await FirebaseAuth.instance.signInWithEmailAndPassword(
-                  email: email,
-                  password: password,
-                );
-                final user = FirebaseAuth.instance.currentUser;
+                final user = AuthService.firebase().currentUser;
                 devtools.log(user.toString());
-                final userWithMailVerify = user?.emailVerified ?? false;
+                final userWithMailVerify = user?.isEmailVerified ?? false;
 
                 if (userWithMailVerify && context.mounted) {
                   Navigator.pushNamedAndRemoveUntil(
@@ -98,17 +91,12 @@ class _LoginViewState extends State<LoginView> {
                   Navigator.pushNamedAndRemoveUntil(
                       context, verifyEmailRoute, (route) => false);
                 }
-              } on FirebaseAuthException catch (e) {
-                devtools.log(
-                  'loginView throw ${e.toString()} and ${e.code.toString()}',
-                );
-                await mostrarAlerta(
-                    context, 'error FireAuthException --- ${e.toString()} ');
-              } catch (e) {
-                await mostrarAlerta(context, 'error ${e.toString()}');
-                devtools.log(
-                  'loginView throw ${e.toString()} in catch General',
-                );
+              } on UserNotFoundAuthExceptions {
+                await mostrarAlerta(context, 'error: User Not Found');
+              } on WrongPasswordAuthExceptions {
+                await mostrarAlerta(context, 'error: Worng Credentials');
+              } on GenericAuthExceptions {
+                await mostrarAlerta(context, 'error: Authentication Error');
               }
             },
             child: const Text('Login'),

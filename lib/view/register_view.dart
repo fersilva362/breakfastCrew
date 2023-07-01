@@ -1,9 +1,10 @@
 import 'dart:developer' as devtools show log;
 import 'dart:js_interop';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:user_app/constant/dialogs.dart';
 import 'package:user_app/constant/routes.dart';
+import 'package:user_app/services/auth/auth_exceptions.dart';
+import 'package:user_app/services/auth/auth_service.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -16,13 +17,7 @@ class _RegisterViewState extends State<RegisterView> {
   late TextEditingController _email;
   late TextEditingController _password;
   String finalWord = 'tatatt';
-  /* final Future _data = Firebase.initializeApp(
-    options: const FirebaseOptions(
-        apiKey: "AIzaSyCSs8xEwHeOEVz-87ECTfNUmO8ZKAQS8Ew",
-        appId: "1:995918257203:web:87dfb0f79391dee26b1746",
-        messagingSenderId: "995918257203",
-        projectId: "user-app-fersilva362-1369"),
-  ); */
+
   @override
   void initState() {
     _email = TextEditingController();
@@ -82,23 +77,38 @@ class _RegisterViewState extends State<RegisterView> {
               try {
                 final email = _email.text;
                 final password = _password.text;
-                final userCredential =
-                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                  email: email,
-                  password: password,
-                );
-                if (userCredential.isDefinedAndNotNull && context.mounted) {
-                  devtools.log("you're logged");
+                await AuthService.firebase()
+                    .createUser(email: email, password: password);
+                await AuthService.firebase().sendEmailVerification();
+
+                if (context.mounted) {
                   Navigator.of(context).pushNamed(verifyEmailRoute);
-                  final emailValidate = FirebaseAuth.instance.currentUser;
-                  await emailValidate?.sendEmailVerification();
                 }
-              } on FirebaseAuthException catch (e) {
+              } on UserNotFoundAuthExceptions {
                 mostrarAlerta(
                   context,
-                  e.toString(),
+                  'Error: User Not Found',
                 );
-                devtools.log(e.toString());
+              } on WeakPassWordAuthExceptions {
+                mostrarAlerta(
+                  context,
+                  'Error: Weak Password',
+                );
+              } on EmailAlreadyInUseAuthExceptions {
+                mostrarAlerta(
+                  context,
+                  'Error: Email Already In Use',
+                );
+              } on InvalidEmailAuthExceptions {
+                mostrarAlerta(
+                  context,
+                  'Error: Invalid Email Format',
+                );
+              } on GenericAuthExceptions {
+                mostrarAlerta(
+                  context,
+                  'Error: Error in Authentication',
+                );
               }
             },
             child: const Text('REGISTER'),
