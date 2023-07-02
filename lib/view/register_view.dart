@@ -1,5 +1,3 @@
-import 'dart:developer' as devtools show log;
-import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:user_app/constant/dialogs.dart';
 import 'package:user_app/constant/routes.dart';

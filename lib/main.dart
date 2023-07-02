@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_service.dart';
-
 import 'package:user_app/view/email_view.dart';
 import 'package:user_app/view/login_view.dart';
 import 'package:user_app/view/notes_view.dart';
