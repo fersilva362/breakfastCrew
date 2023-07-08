@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
 import 'package:user_app/services/auth/auth_provider.dart';
 import 'package:user_app/services/auth/auth_user.dart';
-import 'dart:developer' as devtools show log;
+//import 'dart:developer' as devtools show log;
 
 void main() {
   group('Mock Authentication', () {
