@@ -1,10 +1,9 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_service.dart';
 import 'package:user_app/services/note_service.dart';
 import 'dart:developer' as devtools show log;
-import '../constant/enums.dart';
+import '../../constant/enums.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -35,6 +34,12 @@ class _NotesViewState extends State<NotesView> {
       appBar: AppBar(
         title: const Text('NoteView'),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(newViewRoute);
+            },
+            icon: const Icon(Icons.add),
+          ),
           PopupMenuButton(
               onSelected: (value) async {
                 switch (value) {
