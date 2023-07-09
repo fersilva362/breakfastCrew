@@ -90,7 +90,7 @@ class NoteService {
     await _ensureDbIsOpen();
     final db = _getDbOrThrowIt();
     final dbuser = await getUser(email: owner.email);
-    if (dbuser == owner) {
+    if (dbuser != owner) {
       throw CouldNotFindUser();
     }
     String text = '';

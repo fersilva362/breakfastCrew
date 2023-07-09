@@ -79,6 +79,7 @@ class _NotesViewState extends State<NotesView> {
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
+                    case ConnectionState.done:
                       return const Text('here we put all your notes');
 
                     default:
