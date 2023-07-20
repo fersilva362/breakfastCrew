@@ -15,17 +15,11 @@ class NotesView extends StatefulWidget {
 class _NotesViewState extends State<NotesView> {
   late final NoteService _noteService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
+
   @override
   void initState() {
     _noteService = NoteService();
-
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _noteService.close();
-    super.dispose();
   }
 
   @override
@@ -79,8 +73,29 @@ class _NotesViewState extends State<NotesView> {
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                    case ConnectionState.done:
-                      return const Text('here we put all your notes');
+                    case ConnectionState.active:
+                      devtools
+                          .log('snapshotOfStream.hasData and is: $snapshot');
+                      if (snapshot.hasData) {
+                        final allNote = snapshot.data as List<DatabaseNote>;
+
+                        return ListView.builder(
+                            itemCount: allNote.length,
+                            itemBuilder: (context, index) {
+                              final myNote = allNote[index].text;
+                              devtools.log(myNote);
+                              return ListTile(
+                                title: Text(
+                                  myNote,
+                                  maxLines: 1,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            });
+                      } else {
+                        return const Text('snapshot hasnt data');
+                      }
 
                     default:
                       return const CircularProgressIndicator();
@@ -110,7 +125,6 @@ Future<bool> mostrarMeDialogo(context) {
       TextButton(
           onPressed: () {
             Navigator.pop(context, true);
-            devtools.log('click logout');
           },
           child: const Text('logout'))
     ]),

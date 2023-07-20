@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:user_app/firebase_options.dart';
 import 'package:user_app/services/auth/auth_user.dart';
 import 'package:user_app/services/auth/auth_provider.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
@@ -95,11 +96,12 @@ class FirebaseAuthProvider implements AuthProvider {
   @override
   Future<void> initialize() async {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
+      options: DefaultFirebaseOptions.currentPlatform,
+      /* const FirebaseOptions(
           apiKey: "AIzaSyCSs8xEwHeOEVz-87ECTfNUmO8ZKAQS8Ew",
           appId: "1:995918257203:web:87dfb0f79391dee26b1746",
           messagingSenderId: "995918257203",
-          projectId: "user-app-fersilva362-1369"),
+          projectId: "user-app-fersilva362-1369"), */
     );
   }
 }

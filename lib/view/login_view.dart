@@ -1,4 +1,3 @@
-import 'dart:developer' as devtools show log;
 import 'package:flutter/material.dart';
 import 'package:user_app/constant/dialogs.dart';
 import 'package:user_app/constant/routes.dart';
@@ -81,7 +80,6 @@ class _LoginViewState extends State<LoginView> {
                     .logIn(email: email, password: password);
 
                 final user = AuthService.firebase().currentUser;
-                devtools.log(user.toString());
                 final userWithMailVerify = user?.isEmailVerified ?? false;
 
                 if (userWithMailVerify && context.mounted) {

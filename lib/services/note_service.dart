@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:developer' as devtools show log;
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
@@ -62,18 +62,28 @@ class DatabaseNote {
 class NoteService {
   Database? _db;
   List<DatabaseNote> _notes = [];
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
-  NoteService._sharedInstance();
+  late StreamController<List<DatabaseNote>> _notesStreamController;
+  //Singleton
   static final NoteService _shared = NoteService._sharedInstance();
+  NoteService._sharedInstance() {
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      },
+    );
+  }
   factory NoteService() => _shared;
+
+  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
     try {
       final user = await getUser(email: email);
+
       return user;
     } on UserNotFoundAuthExceptions {
       final createdUser = await createUser(email: email);
+
       return createdUser;
     } catch (e) {
       rethrow;
@@ -82,6 +92,7 @@ class NoteService {
 
   Future<void> _cacheNotes() async {
     final allNotes = await getAllNote();
+
     _notes = allNotes.toList();
     _notesStreamController.add(_notes);
   }
@@ -94,13 +105,14 @@ class NoteService {
       throw CouldNotFindUser();
     }
     String text = '';
-    final id = await db.insert(
+    final noteId = await db.insert(
       noteTable,
       {userIdCol: owner.id, textCol: text, isSynceWiothCloudCol: 1},
     );
     final note = DatabaseNote(
-        id: id, userId: owner.id, text: text, isSynceWithCloud: true);
+        id: noteId, userId: owner.id, text: text, isSynceWithCloud: true);
     _notes.add(note);
+
     _notesStreamController.add(_notes);
     return note;
   }
@@ -163,7 +175,9 @@ class NoteService {
       noteTable,
       {textCol: text, isSynceWiothCloudCol: 0},
     );
+
     if (updatesCounts == 0) {
+      devtools.log('error in update');
       throw CouldNotUpdateNote();
     } else {
       final noteUpdate = await getNote(id: note.id);
@@ -193,8 +207,9 @@ class NoteService {
       where: 'email=?',
       whereArgs: [email.toLowerCase()],
     );
+
     if (result.isEmpty) {
-      throw CouldNotFindUser();
+      throw UserNotFoundAuthExceptions();
     } else {
       return DatabaseUser.fromRow(result.first);
     }
@@ -255,21 +270,22 @@ class NoteService {
     }
     try {
       final docsPath = await getApplicationDocumentsDirectory();
+
       final dbPath = join(docsPath.path, dbName);
       final db = await openDatabase(dbPath);
       _db = db;
-      const createUserTable = '''CREATE TABLE IF NOT EXIST "user" (
+      const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
         "id"	INTEGER NOT NULL,
         "email"	TEXT NOT NULL UNIQUE,
-        PRIMARY KEY("id")
+        PRIMARY KEY("id" AUTOINCREMENT)
          );''';
       db.execute(createUserTable);
 
-      const createNoteTable = '''CREATE TABLE IF NOT EXIST "note" (
+      const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
         "id"	INTEGER NOT NULL,
         "user_id"	INTEGER NOT NULL,
-        "text"	TEXT NOT NULL,
-        "is_synce_with_cloud"	INTEGER NOT NULL,
+        "text"	TEXT,
+        "is_synce_with_cloud"	INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY("id" AUTOINCREMENT),
         FOREIGN KEY("user_id") REFERENCES "user"("id")
       );''';

@@ -7,11 +7,10 @@ import 'package:user_app/view/login_view.dart';
 import 'package:user_app/view/note/new_note_view.dart';
 import 'package:user_app/view/note/notes_view.dart';
 import 'package:user_app/view/register_view.dart';
-import 'dart:developer' as devtools show log;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+//AuthService.firebase().initialize();
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     routes: {
@@ -44,14 +43,10 @@ class HomePage extends StatelessWidget {
       future: _data,
       builder: (context, snapshot) {
         final user = AuthService.firebase().currentUser;
-        //final user = FirebaseAuth.instance.currentUser;
         switch (snapshot.connectionState) {
           case ConnectionState.done:
             if (user != null) {
               if (user.isEmailVerified) {
-                devtools
-                    .log('emailVerified=${user.isEmailVerified.toString()}');
-
                 return const NotesView();
               } else {
                 return const Email();

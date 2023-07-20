@@ -10,6 +10,8 @@ class CouldNotUpdateNote implements Exception {}
 
 class DatabaseAlreadyIsOpenException implements Exception {}
 
+class CouldNotCreateUserInNote implements Exception {}
+
 class DatabaseIsNotOpen implements Exception {}
 
 class CouldNotDeleteUser implements Exception {}
