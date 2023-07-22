@@ -4,7 +4,7 @@ import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_service.dart';
 import 'package:user_app/view/email_view.dart';
 import 'package:user_app/view/login_view.dart';
-import 'package:user_app/view/note/new_note_view.dart';
+import 'package:user_app/view/note/create_update_note_view.dart';
 import 'package:user_app/view/note/notes_view.dart';
 import 'package:user_app/view/register_view.dart';
 
@@ -18,7 +18,7 @@ void main() async {
       registerRoute: (context) => const RegisterView(),
       noteRoute: (context) => const NotesView(),
       verifyEmailRoute: (context) => const Email(),
-      newViewRoute: (context) => const NewNoteView(),
+      createOrUpdateNoteRoute: (context) => const CreateUpdateNoteView(),
     },
     home: const HomePage(),
     //register: fer@unc.com pass=tester1

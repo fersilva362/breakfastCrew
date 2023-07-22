@@ -112,7 +112,6 @@ class NoteService {
     final note = DatabaseNote(
         id: noteId, userId: owner.id, text: text, isSynceWithCloud: true);
     _notes.add(note);
-
     _notesStreamController.add(_notes);
     return note;
   }

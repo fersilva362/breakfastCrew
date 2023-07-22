@@ -3,14 +3,16 @@ import 'package:user_app/services/auth/auth_service.dart';
 import 'package:user_app/services/note_service.dart';
 import 'dart:developer' as devtools show log;
 
-class NewNoteView extends StatefulWidget {
-  const NewNoteView({super.key});
+import 'package:user_app/utilities/generic/get_arguments.dart';
+
+class CreateUpdateNoteView extends StatefulWidget {
+  const CreateUpdateNoteView({super.key});
 
   @override
-  State<NewNoteView> createState() => _NewNoteViewState();
+  State<CreateUpdateNoteView> createState() => _CreateUpdateNoteViewState();
 }
 
-class _NewNoteViewState extends State<NewNoteView> {
+class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
   DatabaseNote? _note;
   late final NoteService _noteService;
   late final TextEditingController _textController;
@@ -21,17 +23,23 @@ class _NewNoteViewState extends State<NewNoteView> {
     super.initState();
   }
 
-  Future<DatabaseNote> createNewNote() async {
+  Future<DatabaseNote> createOrGetExistingNote() async {
+    final widgetNote = context.getArguments<DatabaseNote>();
+    if (widgetNote != null) {
+      _note = widgetNote;
+      _textController.text = widgetNote.text;
+    }
+
     final existingNote = _note;
     if (existingNote != null) {
-      devtools.log('pasa por el if de createNewNote ');
       return existingNote;
     }
     final currenteUser = AuthService.firebase().currentUser!;
     final email = currenteUser.email!;
     final owner = await _noteService.getUser(email: email);
-
     final newNote = await _noteService.createNote(owner: owner);
+    _note = newNote;
+
     return newNote;
   }
 
@@ -55,8 +63,6 @@ class _NewNoteViewState extends State<NewNoteView> {
         note: note,
       );
     }
-    devtools.log('deberia haber pasado por aca y save it pero note is $note');
-    devtools.log(text);
   }
 
   void _textControllerListener() async {
@@ -79,7 +85,6 @@ class _NewNoteViewState extends State<NewNoteView> {
 
   @override
   void dispose() {
-    devtools.log('note after dispose ${_note.toString()}');
     _deleteNoteIfTextEmpty();
     _saveNoteIfTextNotEmpty();
     _textController.dispose();
@@ -93,12 +98,10 @@ class _NewNoteViewState extends State<NewNoteView> {
         title: const Text('New Note'),
       ),
       body: FutureBuilder(
-        future: createNewNote(),
+        future: createOrGetExistingNote(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              _note = snapshot.data;
-              devtools.log('_note is $_note');
               _setupTextController();
 
               return TextField(

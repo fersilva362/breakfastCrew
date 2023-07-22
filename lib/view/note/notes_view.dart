@@ -32,7 +32,7 @@ class _NotesViewState extends State<NotesView> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(newViewRoute);
+              Navigator.of(context).pushNamed(createOrUpdateNoteRoute);
             },
             icon: const Icon(Icons.add),
           ),
@@ -76,8 +76,6 @@ class _NotesViewState extends State<NotesView> {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
                     case ConnectionState.active:
-                      devtools
-                          .log('snapshotOfStream.hasData and is: $snapshot');
                       if (snapshot.hasData) {
                         final allNote = snapshot.data as List<DatabaseNote>;
 
@@ -85,6 +83,12 @@ class _NotesViewState extends State<NotesView> {
                           notes: allNote,
                           onDeleteNote: (DatabaseNote note) async {
                             await _noteService.deleteNote(id: note.id);
+                          },
+                          onTap: (DatabaseNote note) {
+                            Navigator.of(context).pushNamed(
+                              createOrUpdateNoteRoute,
+                              arguments: note,
+                            );
                           },
                         );
                       } else {
