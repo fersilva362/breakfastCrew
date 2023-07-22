@@ -78,7 +78,7 @@ class _NotesViewState extends State<NotesView> {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
                         final allNote = snapshot.data as List<DatabaseNote>;
-
+                        devtools.log(allNote.toString());
                         return NoteListView(
                           notes: allNote,
                           onDeleteNote: (DatabaseNote note) async {

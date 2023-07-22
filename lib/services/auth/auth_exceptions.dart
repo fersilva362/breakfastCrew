@@ -11,3 +11,5 @@ class InvalidEmailAuthExceptions implements Exception {}
 class GenericAuthExceptions implements Exception {}
 
 class UserNotLoggedInAuthExceptions implements Exception {}
+
+class UserShouldBeSetBeforeReadAllNotes implements Exception {}

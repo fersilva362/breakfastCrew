@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import 'package:user_app/extension/list/filter.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
 
 import 'crud/crud_exceptions.dart';
@@ -61,6 +62,8 @@ class DatabaseNote {
 
 class NoteService {
   Database? _db;
+  DatabaseUser? _user;
+
   List<DatabaseNote> _notes = [];
   late StreamController<List<DatabaseNote>> _notesStreamController;
   //Singleton
@@ -74,16 +77,25 @@ class NoteService {
   }
   factory NoteService() => _shared;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeReadAllNotes();
+        }
+      });
 
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
     try {
       final user = await getUser(email: email);
-
+      _user = user;
       return user;
     } on UserNotFoundAuthExceptions {
       final createdUser = await createUser(email: email);
-
+      _user =
+          createdUser; //in the original version there is a setAddCurrentUser that I don't like it too much
       return createdUser;
     } catch (e) {
       rethrow;
@@ -173,6 +185,8 @@ class NoteService {
     final updatesCounts = await db.update(
       noteTable,
       {textCol: text, isSynceWiothCloudCol: 0},
+      where: 'id=?',
+      whereArgs: [note.id],
     );
 
     if (updatesCounts == 0) {
