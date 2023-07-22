@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:user_app/constant/dialogs.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
 import 'package:user_app/services/auth/auth_service.dart';
+
+import '../utilities/dialogs/generic_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -83,27 +84,27 @@ class _RegisterViewState extends State<RegisterView> {
                   Navigator.of(context).pushNamed(verifyEmailRoute);
                 }
               } on UserNotFoundAuthExceptions {
-                mostrarAlerta(
+                showErrorDialog(
                   context,
                   'Error: User Not Found',
                 );
               } on WeakPassWordAuthExceptions {
-                mostrarAlerta(
+                showErrorDialog(
                   context,
                   'Error: Weak Password',
                 );
               } on EmailAlreadyInUseAuthExceptions {
-                mostrarAlerta(
+                showErrorDialog(
                   context,
                   'Error: Email Already In Use',
                 );
               } on InvalidEmailAuthExceptions {
-                mostrarAlerta(
+                showErrorDialog(
                   context,
                   'Error: Invalid Email Format',
                 );
               } on GenericAuthExceptions {
-                mostrarAlerta(
+                showErrorDialog(
                   context,
                   'Error: Error in Authentication',
                 );

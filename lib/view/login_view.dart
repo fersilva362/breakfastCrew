@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:user_app/constant/dialogs.dart';
+import 'package:user_app/utilities/dialogs/generic_error_dialog.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
 import 'package:user_app/services/auth/auth_service.dart';
@@ -90,11 +90,11 @@ class _LoginViewState extends State<LoginView> {
                       context, verifyEmailRoute, (route) => false);
                 }
               } on UserNotFoundAuthExceptions {
-                await mostrarAlerta(context, 'error: User Not Found');
+                await showErrorDialog(context, 'error: User Not Found');
               } on WrongPasswordAuthExceptions {
-                await mostrarAlerta(context, 'error: Worng Credentials');
+                await showErrorDialog(context, 'error: Worng Credentials');
               } on GenericAuthExceptions {
-                await mostrarAlerta(context, 'error: Authentication Error');
+                await showErrorDialog(context, 'error: Authentication Error');
               }
             },
             child: const Text('Login'),

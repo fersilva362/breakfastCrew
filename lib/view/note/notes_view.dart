@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_service.dart';
 import 'package:user_app/services/note_service.dart';
+import 'package:user_app/view/note/note_list_view.dart';
 import 'dart:developer' as devtools show log;
 import '../../constant/enums.dart';
+import '../../utilities/dialogs/logout_dialog.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -38,7 +40,7 @@ class _NotesViewState extends State<NotesView> {
               onSelected: (value) async {
                 switch (value) {
                   case MenuAction.logout:
-                    final dataShow = await mostrarMeDialogo(context);
+                    final dataShow = await showLogOutDialog(context);
                     if (dataShow) {
                       await AuthService.firebase().logOut();
                       if (context.mounted) {
@@ -79,20 +81,12 @@ class _NotesViewState extends State<NotesView> {
                       if (snapshot.hasData) {
                         final allNote = snapshot.data as List<DatabaseNote>;
 
-                        return ListView.builder(
-                            itemCount: allNote.length,
-                            itemBuilder: (context, index) {
-                              final myNote = allNote[index].text;
-                              devtools.log(myNote);
-                              return ListTile(
-                                title: Text(
-                                  myNote,
-                                  maxLines: 1,
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            });
+                        return NoteListView(
+                          notes: allNote,
+                          onDeleteNote: (DatabaseNote note) async {
+                            await _noteService.deleteNote(id: note.id);
+                          },
+                        );
                       } else {
                         return const Text('snapshot hasnt data');
                       }
@@ -111,7 +105,7 @@ class _NotesViewState extends State<NotesView> {
   }
 }
 
-Future<bool> mostrarMeDialogo(context) {
+/* Future<bool> showLogOutDialog(context) {
   return showDialog<bool>(
     context: context,
     builder: (context) =>
@@ -130,3 +124,4 @@ Future<bool> mostrarMeDialogo(context) {
     ]),
   ).then((value) => value ?? false);
 }
+ */
