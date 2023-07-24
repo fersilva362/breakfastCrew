@@ -1,4 +1,4 @@
-import 'dart:async';
+/* import 'dart:async';
 import 'dart:developer' as devtools show log;
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
@@ -318,3 +318,4 @@ const emailCol = 'email';
 const userIdCol = 'user_id';
 const textCol = 'text';
 const isSynceWiothCloudCol = 'is_synce_with_cloud';
+ */
