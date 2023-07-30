@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:user_app/services/auth/bloc/auth_bloc.dart';
+import 'package:user_app/services/auth/bloc/auth_event.dart';
+import 'package:user_app/services/auth/bloc/auth_state.dart';
 import 'package:user_app/utilities/dialogs/generic_error_dialog.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
@@ -38,75 +42,85 @@ class _LoginViewState extends State<LoginView> {
         title: const Text('Login Page '),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 10.0,
-          ),
-          TextField(
-            autocorrect: false,
-            controller: _email,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.person),
-              label: const Text('Email'),
-              hintText: 'Please introduce your email',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              keyboardType: TextInputType.emailAddress,
+              autocorrect: false,
+              controller: _email,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.person),
+                label: const Text('Email'),
+                hintText: 'Please introduce your email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 10.0,
-          ),
-          TextField(
-            autocorrect: false,
-            enableSuggestions: false,
-            obscureText: true,
-            controller: _password,
-            decoration: InputDecoration(
-              label: const Text('Password'),
-              hintText: 'Please introduce your password',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+            const SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              autocorrect: false,
+              enableSuggestions: false,
+              obscureText: true,
+              controller: _password,
+              decoration: InputDecoration(
+                label: const Text('Password'),
+                hintText: 'Please introduce your password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                final email = _email.text;
-                final password = _password.text;
-                await AuthService.firebase()
-                    .logIn(email: email, password: password);
+            TextButton(
+              onPressed: () async {
+                try {
+                  final email = _email.text;
+                  final password = _password.text;
+                  context.read<AuthBloc>().add(
+                        AuthEventLogIn(
+                          email,
+                          password,
+                        ),
+                      );
 
-                final user = AuthService.firebase().currentUser;
-                final userWithMailVerify = user?.isEmailVerified ?? false;
+                  /* await AuthService.firebase()
+                      .logIn(email: email, password: password);
 
-                if (userWithMailVerify && context.mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, noteRoute, (route) => false);
-                } else {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, verifyEmailRoute, (route) => false);
+                  final user = AuthService.firebase().currentUser;
+                  final userWithMailVerify = user?.isEmailVerified ?? false;
+
+                  if (userWithMailVerify && context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, noteRoute, (route) => false);
+                  } else {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, verifyEmailRoute, (route) => false);
+                  } */
+                } on UserNotFoundAuthExceptions {
+                  await showErrorDialog(context, 'error: User Not Found');
+                } on WrongPasswordAuthExceptions {
+                  await showErrorDialog(context, 'error: Worng Credentials');
+                } on GenericAuthExceptions {
+                  await showErrorDialog(context, 'error: Authentication Error');
                 }
-              } on UserNotFoundAuthExceptions {
-                await showErrorDialog(context, 'error: User Not Found');
-              } on WrongPasswordAuthExceptions {
-                await showErrorDialog(context, 'error: Worng Credentials');
-              } on GenericAuthExceptions {
-                await showErrorDialog(context, 'error: Authentication Error');
-              }
-            },
-            child: const Text('Login'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(registerRoute, (route) => false);
-            },
-            child: const Text('Click here to register'),
-          ),
-        ],
+              },
+              child: const Text('Login'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil(registerRoute, (route) => false);
+              },
+              child: const Text('Click here to register'),
+            ),
+          ],
+        ),
       ),
     );
   }
