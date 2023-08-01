@@ -6,7 +6,6 @@ import 'package:user_app/services/auth/bloc/auth_state.dart';
 import 'package:user_app/utilities/dialogs/generic_error_dialog.dart';
 import 'package:user_app/constant/routes.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
-import 'package:user_app/services/auth/auth_service.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -77,9 +76,21 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: () async {
-                try {
+            BlocListener<AuthBloc, AuthState>(
+              listener: (context, state) async {
+                if (state is AuthStateLoggedOut) {
+                  if (state is UserNotFoundAuthExceptions) {
+                    await showErrorDialog(context, 'error: User Not Found');
+                  } else if (state is WrongPasswordAuthExceptions) {
+                    await showErrorDialog(context, 'error: Worng Credentials');
+                  } else {
+                    await showErrorDialog(
+                        context, 'error: Authentication Error');
+                  }
+                }
+              },
+              child: TextButton(
+                onPressed: () async {
                   final email = _email.text;
                   final password = _password.text;
                   context.read<AuthBloc>().add(
@@ -88,29 +99,9 @@ class _LoginViewState extends State<LoginView> {
                           password,
                         ),
                       );
-
-                  /* await AuthService.firebase()
-                      .logIn(email: email, password: password);
-
-                  final user = AuthService.firebase().currentUser;
-                  final userWithMailVerify = user?.isEmailVerified ?? false;
-
-                  if (userWithMailVerify && context.mounted) {
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, noteRoute, (route) => false);
-                  } else {
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, verifyEmailRoute, (route) => false);
-                  } */
-                } on UserNotFoundAuthExceptions {
-                  await showErrorDialog(context, 'error: User Not Found');
-                } on WrongPasswordAuthExceptions {
-                  await showErrorDialog(context, 'error: Worng Credentials');
-                } on GenericAuthExceptions {
-                  await showErrorDialog(context, 'error: Authentication Error');
-                }
-              },
-              child: const Text('Login'),
+                },
+                child: const Text('Login'),
+              ),
             ),
             TextButton(
               onPressed: () {

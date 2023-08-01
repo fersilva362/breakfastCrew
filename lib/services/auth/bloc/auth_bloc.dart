@@ -37,7 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       } on Exception catch (e) {
         emit(
-          AuthStateFailureLogIn(e),
+          AuthStateLoggedOut(e),
         );
       }
     });
