@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:user_app/constant/routes.dart';
-import 'package:user_app/services/auth/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:user_app/services/auth/bloc/auth_bloc.dart';
+import 'package:user_app/services/auth/bloc/auth_event.dart';
 
 class Email extends StatefulWidget {
   const Email({super.key});
@@ -24,8 +25,10 @@ class _EmailState extends State<Email> {
           ),
           const Text('If you  have not receive it  your email'),
           TextButton(
-            onPressed: () async {
-              await AuthService.firebase().sendEmailVerification();
+            onPressed: () {
+              context.read<AuthBloc>().add(
+                    const AuthEventSenEmailVerification(),
+                  );
             },
             child: const Text('sent Email'),
           ),
@@ -33,12 +36,10 @@ class _EmailState extends State<Email> {
             height: 20.0,
           ),
           TextButton(
-              onPressed: () async {
-                await AuthService.firebase().logOut();
-                if (context.mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, registerRoute, (route) => false);
-                }
+              onPressed: () {
+                context.read<AuthBloc>().add(
+                      const AuthEventLogOut(),
+                    );
               },
               child: const Text('login'))
         ],

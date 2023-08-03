@@ -5,6 +5,7 @@ import 'package:user_app/services/auth/auth_provider.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
 import 'package:firebase_auth/firebase_auth.dart'
     show FirebaseAuth, FirebaseAuthException;
+import 'dart:developer' as devtool show log;
 
 class FirebaseAuthProvider implements AuthProvider {
   @override
@@ -29,6 +30,7 @@ class FirebaseAuthProvider implements AuthProvider {
       } else if (e.code == 'invalid-email') {
         throw InvalidEmailAuthExceptions();
       } else {
+        devtool.log(' e.code in register view >>${e.code.toString()}');
         throw GenericAuthExceptions();
       }
     } catch (_) {
