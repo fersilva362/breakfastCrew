@@ -5,7 +5,6 @@ import 'package:user_app/services/auth/bloc/auth_event.dart';
 import 'package:user_app/services/auth/bloc/auth_state.dart';
 import 'package:user_app/utilities/dialogs/generic_error_dialog.dart';
 import 'package:user_app/services/auth/auth_exceptions.dart';
-import 'package:user_app/utilities/dialogs/loading_dialog.dart';
 import 'dart:developer' as devtool show log;
 
 class LoginView extends StatefulWidget {
@@ -18,7 +17,7 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late TextEditingController _email;
   late TextEditingController _password;
-  CloseDialog? _closeDialogHandle;
+  //CloseDialog? _closeDialogHandle;
 
   @override
   void initState() {
@@ -39,25 +38,12 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
-        final closeDialog = _closeDialogHandle;
-
         if (state is AuthStateLoggedOut) {
-          if (!state.isLoading && closeDialog != null) {
-            closeDialog();
-            _closeDialogHandle = null;
-          } else if (state.isLoading && closeDialog == null) {
-            _closeDialogHandle = showLoadingDialog(
-              context: context,
-              text: 'Loading...',
-            );
-          }
-
           if (state.exception is UserNotFoundAuthExceptions) {
             await showErrorDialog(context, 'error: User Not Found');
           } else if (state.exception is WrongPasswordAuthExceptions) {
             await showErrorDialog(context, 'error: Worng Credentials');
           } else if (state.exception is GenericAuthExceptions) {
-            devtool.log('generic');
             await showErrorDialog(context, 'error: Authentication Error');
           }
         }

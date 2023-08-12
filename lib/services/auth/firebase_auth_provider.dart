@@ -54,6 +54,7 @@ class FirebaseAuthProvider implements AuthProvider {
     required String password,
   }) async {
     try {
+      await Future.delayed(const Duration(seconds: 3));
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       final user = currentUser;
@@ -63,6 +64,7 @@ class FirebaseAuthProvider implements AuthProvider {
         throw UserNotLoggedInAuthExceptions();
       }
     } on FirebaseAuthException catch (e) {
+      devtool.log(e.message.toString());
       if (e.code == 'user-not-found') {
         throw UserNotFoundAuthExceptions();
       } else if (e.code == 'wrong-password') {
