@@ -32,3 +32,8 @@ class AuthEventSenEmailVerification extends AuthEvent {
 class AuthEventLogOut extends AuthEvent {
   const AuthEventLogOut();
 }
+
+class AuthEventForgotPassword extends AuthEvent {
+  final String? email;
+  const AuthEventForgotPassword({this.email});
+}

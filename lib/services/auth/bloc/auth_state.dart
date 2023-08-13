@@ -21,8 +21,18 @@ class AuthStateLoggedIn extends AuthState {
 
 class AuthStateRegistering extends AuthState {
   final Exception? exception;
-
   AuthStateRegistering({required bool isLoading, this.exception})
+      : super(isLoading: isLoading);
+}
+
+class AuthStateForgotPassword extends AuthState {
+  final Exception? exception;
+  final bool hasSentEmail;
+
+  const AuthStateForgotPassword(
+      {required this.exception,
+      required this.hasSentEmail,
+      required bool isLoading})
       : super(isLoading: isLoading);
 }
 
@@ -37,7 +47,6 @@ class AuthStateLoggedOut extends AuthState with EquatableMixin {
           isLoading: isLoading,
           isLoadingText: isLoadingText,
         );
-
   @override
   List<Object?> get props => [exception, isLoading];
 }
